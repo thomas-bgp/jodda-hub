@@ -35,7 +35,7 @@ export async function POST() {
 
   try {
     const tokenResponse = await fetch(
-      "https://api.mercadolivre.com.br/oauth/token",
+      "https://api.mercadolibre.com/oauth/token",
       {
         method: "POST",
         headers: { "Content-Type": "application/json" },
