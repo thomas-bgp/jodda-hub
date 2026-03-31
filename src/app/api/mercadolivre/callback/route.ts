@@ -84,8 +84,11 @@ export async function GET(request: NextRequest) {
 
     console.log("ML token saved for user_id:", tokenInfo.user_id);
 
+    const baseUrl = process.env.ML_REDIRECT_URI
+      ? new URL(process.env.ML_REDIRECT_URI).origin
+      : "https://ecomerce.bertuzzipatrimonial.com.br";
     return NextResponse.redirect(
-      new URL("/dashboard/integracoes?ml=connected", request.url)
+      `${baseUrl}/dashboard/integracoes?ml=connected`
     );
   } catch (error) {
     console.error("ML callback error:", error);
