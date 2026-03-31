@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { writeFile, mkdir } from "fs/promises";
+import { cookies } from "next/headers";
 import path from "path";
 
 export async function GET(request: NextRequest) {
@@ -25,6 +26,17 @@ export async function GET(request: NextRequest) {
     );
   }
 
+  // Get PKCE code_verifier from cookie
+  const cookieStore = await cookies();
+  const codeVerifier = cookieStore.get("ml_code_verifier")?.value;
+
+  if (!codeVerifier) {
+    return NextResponse.json(
+      { error: "code_verifier não encontrado. Tente conectar novamente." },
+      { status: 400 }
+    );
+  }
+
   try {
     const tokenResponse = await fetch(
       "https://api.mercadolibre.com/oauth/token",
@@ -37,6 +49,7 @@ export async function GET(request: NextRequest) {
           client_secret: appSecret,
           code,
           redirect_uri: redirectUri,
+          code_verifier: codeVerifier,
         }),
       }
     );
