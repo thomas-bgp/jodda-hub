@@ -1,17 +1,12 @@
 import { NextResponse } from "next/server";
-import { readFile } from "fs/promises";
-import path from "path";
+import { getValidToken } from "@/lib/ml-token";
 
 export const dynamic = "force-dynamic";
 
 export async function GET() {
   try {
-    const tokenPath = path.join(process.cwd(), "data", "ml-token.json");
-    let token;
-    try {
-      const raw = await readFile(tokenPath, "utf-8");
-      token = JSON.parse(raw);
-    } catch {
+    const token = await getValidToken();
+    if (!token) {
       return NextResponse.json(
         { error: "Não conectado ao Mercado Livre", connected: false },
         { status: 401 }
@@ -19,9 +14,7 @@ export async function GET() {
     }
 
     const response = await fetch("https://api.mercadolibre.com/users/me", {
-      headers: {
-        Authorization: `Bearer ${token.access_token}`,
-      },
+      headers: { Authorization: `Bearer ${token.access_token}` },
     });
 
     if (!response.ok) {

@@ -1,14 +1,7 @@
 import { NextResponse } from "next/server";
-import { readFile } from "fs/promises";
-import path from "path";
+import { getValidToken } from "@/lib/ml-token";
 
 export const dynamic = "force-dynamic";
-
-async function getToken() {
-  const tokenPath = path.join(process.cwd(), "data", "ml-token.json");
-  const raw = await readFile(tokenPath, "utf-8");
-  return JSON.parse(raw);
-}
 
 async function mlFetch(url: string, accessToken: string) {
   const res = await fetch(url, {
@@ -20,23 +13,24 @@ async function mlFetch(url: string, accessToken: string) {
 
 export async function GET() {
   try {
-    let token;
-    try {
-      token = await getToken();
-    } catch {
+    const token = await getValidToken();
+    if (!token) {
       return NextResponse.json(
-        { error: "Nao conectado ao Mercado Livre", connected: false },
+        { error: "Não conectado ao Mercado Livre", connected: false },
         { status: 401 }
       );
     }
 
-    const { access_token, user_id } = token;
-
-    // Fetch orders to calculate metrics
-    const ordersData = await mlFetch(
-      `https://api.mercadolibre.com/orders/search?seller=${user_id}&sort=date_desc&limit=50`,
-      access_token
-    );
+    const [ordersData, itemsData] = await Promise.all([
+      mlFetch(
+        `https://api.mercadolibre.com/orders/search?seller=${token.user_id}&sort=date_desc&limit=50`,
+        token.access_token
+      ),
+      mlFetch(
+        `https://api.mercadolibre.com/users/${token.user_id}/items/search?limit=0`,
+        token.access_token
+      ),
+    ]);
 
     const orders = ordersData.results || [];
     const totalOrders = ordersData.paging?.total || orders.length;
@@ -46,20 +40,12 @@ export async function GET() {
       totalRevenue += order.total_amount || 0;
     }
 
-    // Estimate total revenue based on paging
     const estimatedRevenue =
       totalOrders > orders.length && orders.length > 0
         ? (totalRevenue / orders.length) * totalOrders
         : totalRevenue;
 
-    const ticketMedio =
-      totalOrders > 0 ? estimatedRevenue / totalOrders : 0;
-
-    // Fetch items count
-    const itemsData = await mlFetch(
-      `https://api.mercadolibre.com/users/${user_id}/items/search?limit=0`,
-      access_token
-    );
+    const ticketMedio = totalOrders > 0 ? estimatedRevenue / totalOrders : 0;
     const totalItems = itemsData.paging?.total || 0;
 
     return NextResponse.json({
@@ -72,7 +58,7 @@ export async function GET() {
   } catch (error) {
     console.error("ML metrics error:", error);
     return NextResponse.json(
-      { error: "Erro ao buscar metricas." },
+      { error: "Erro ao buscar métricas." },
       { status: 500 }
     );
   }

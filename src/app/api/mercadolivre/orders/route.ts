@@ -1,14 +1,7 @@
 import { NextResponse } from "next/server";
-import { readFile } from "fs/promises";
-import path from "path";
+import { getValidToken } from "@/lib/ml-token";
 
 export const dynamic = "force-dynamic";
-
-async function getToken() {
-  const tokenPath = path.join(process.cwd(), "data", "ml-token.json");
-  const raw = await readFile(tokenPath, "utf-8");
-  return JSON.parse(raw);
-}
 
 async function mlFetch(url: string, accessToken: string) {
   const res = await fetch(url, {
@@ -20,21 +13,17 @@ async function mlFetch(url: string, accessToken: string) {
 
 export async function GET() {
   try {
-    let token;
-    try {
-      token = await getToken();
-    } catch {
+    const token = await getValidToken();
+    if (!token) {
       return NextResponse.json(
-        { error: "Nao conectado ao Mercado Livre", connected: false },
+        { error: "Não conectado ao Mercado Livre", connected: false },
         { status: 401 }
       );
     }
 
-    const { access_token, user_id } = token;
-
     const ordersData = await mlFetch(
-      `https://api.mercadolibre.com/orders/search?seller=${user_id}&sort=date_desc&limit=50`,
-      access_token
+      `https://api.mercadolibre.com/orders/search?seller=${token.user_id}&sort=date_desc&limit=50`,
+      token.access_token
     );
 
     const orders = ordersData.results || [];

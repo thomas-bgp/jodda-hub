@@ -1,14 +1,7 @@
 import { NextResponse } from "next/server";
-import { readFile } from "fs/promises";
-import path from "path";
+import { getValidToken } from "@/lib/ml-token";
 
 export const dynamic = "force-dynamic";
-
-async function getToken() {
-  const tokenPath = path.join(process.cwd(), "data", "ml-token.json");
-  const raw = await readFile(tokenPath, "utf-8");
-  return JSON.parse(raw);
-}
 
 async function mlFetch(url: string, accessToken: string) {
   const res = await fetch(url, {
@@ -20,22 +13,17 @@ async function mlFetch(url: string, accessToken: string) {
 
 export async function GET() {
   try {
-    let token;
-    try {
-      token = await getToken();
-    } catch {
+    const token = await getValidToken();
+    if (!token) {
       return NextResponse.json(
-        { error: "Nao conectado ao Mercado Livre", connected: false },
+        { error: "Não conectado ao Mercado Livre", connected: false },
         { status: 401 }
       );
     }
 
-    const { access_token, user_id } = token;
-
-    // Get item IDs
     const searchData = await mlFetch(
-      `https://api.mercadolibre.com/users/${user_id}/items/search?limit=50`,
-      access_token
+      `https://api.mercadolibre.com/users/${token.user_id}/items/search?limit=50`,
+      token.access_token
     );
 
     const itemIds: string[] = searchData.results || [];
@@ -45,13 +33,12 @@ export async function GET() {
       return NextResponse.json({ connected: true, items: [], total: 0 });
     }
 
-    // Fetch item details in batches of 20 (ML multiget limit)
     const items: any[] = [];
     for (let i = 0; i < itemIds.length; i += 20) {
       const batch = itemIds.slice(i, i + 20);
       const multiget = await mlFetch(
         `https://api.mercadolibre.com/items?ids=${batch.join(",")}&attributes=id,title,price,thumbnail,sold_quantity,available_quantity,status,currency_id`,
-        access_token
+        token.access_token
       );
       for (const entry of multiget) {
         if (entry.code === 200 && entry.body) {
