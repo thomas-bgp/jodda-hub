@@ -1,148 +1,232 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   DollarSign,
-  TrendingUp,
-  Eye,
-  MousePointer,
-  BarChart3,
-  Target,
+  ShoppingCart,
+  Receipt,
+  Package,
+  User,
   Star,
-  Megaphone,
+  CalendarDays,
+  Loader2,
+  LinkIcon,
 } from "lucide-react";
+import Link from "next/link";
 
-const tabs = ["Dashboard", "Campanhas", "Anúncios", "Métricas", "Reputação"];
+const fmt = new Intl.NumberFormat("pt-BR", {
+  style: "currency",
+  currency: "BRL",
+});
 
-const cards = [
-  { label: "Faturamento ADS", value: "R$ 12.847,30", icon: DollarSign, color: "bg-emerald-500", change: "+12,3%" },
-  { label: "Investimento", value: "R$ 2.156,80", icon: TrendingUp, color: "bg-blue-500", change: "+5,7%" },
-  { label: "ACOS", value: "16,78%", icon: Target, color: "bg-indigo-500", change: "-2,1%" },
-  { label: "Impressões", value: "284.532", icon: Eye, color: "bg-purple-500", change: "+18,4%" },
-  { label: "Cliques", value: "8.432", icon: MousePointer, color: "bg-amber-500", change: "+9,2%" },
-];
+interface Seller {
+  id: number;
+  nickname: string;
+  first_name: string;
+  last_name: string;
+  email: string;
+  registration_date: string;
+  seller_reputation: {
+    level_id: string;
+    power_seller_status: string | null;
+    transactions: {
+      completed: number;
+      canceled: number;
+      total: number;
+    };
+  };
+}
 
-const adTypes = [
-  { tipo: "Product Ads", quantidade: 45, faturamento: "R$ 8.234,50", percentual: 64 },
-  { tipo: "Brand Ads", quantidade: 12, faturamento: "R$ 3.112,80", percentual: 24 },
-  { tipo: "Display Ads", quantidade: 8, faturamento: "R$ 1.500,00", percentual: 12 },
-];
+interface Metrics {
+  connected: boolean;
+  faturamento: number;
+  pedidos: number;
+  ticket_medio: number;
+  produtos: number;
+}
+
+function formatDate(dateStr: string) {
+  try {
+    return new Date(dateStr).toLocaleDateString("pt-BR", {
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
+    });
+  } catch {
+    return dateStr;
+  }
+}
 
 export default function MercadoLivrePage() {
-  const [activeTab, setActiveTab] = useState("Dashboard");
+  const [loading, setLoading] = useState(true);
+  const [connected, setConnected] = useState(false);
+  const [seller, setSeller] = useState<Seller | null>(null);
+  const [metrics, setMetrics] = useState<Metrics | null>(null);
+
+  useEffect(() => {
+    async function fetchData() {
+      try {
+        const [sellerRes, metricsRes] = await Promise.all([
+          fetch("/api/mercadolivre/seller"),
+          fetch("/api/mercadolivre/metrics"),
+        ]);
+
+        if (sellerRes.ok) {
+          const data = await sellerRes.json();
+          if (data.nickname) {
+            setConnected(true);
+            setSeller(data);
+          }
+        }
+
+        if (metricsRes.ok) {
+          const data = await metricsRes.json();
+          if (data.connected) {
+            setConnected(true);
+            setMetrics(data);
+          }
+        }
+      } catch (err) {
+        console.error("Erro ao carregar dados ML:", err);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    fetchData();
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-[60vh]">
+        <Loader2 className="w-8 h-8 text-indigo-600 animate-spin" />
+      </div>
+    );
+  }
+
+  if (!connected) {
+    return (
+      <div className="space-y-6">
+        <div>
+          <h1 className="text-2xl font-bold text-gray-900">Gestao Mercado Livre</h1>
+          <p className="text-sm text-gray-500 mt-1">Gerencie sua conta e acompanhe metricas do Mercado Livre</p>
+        </div>
+        <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-12 text-center">
+          <LinkIcon className="w-12 h-12 text-gray-300 mx-auto mb-4" />
+          <h3 className="text-lg font-semibold text-gray-900 mb-2">Conta nao conectada</h3>
+          <p className="text-gray-500 mb-6">
+            Conecte seu Mercado Livre em Integracoes para visualizar seus dados
+          </p>
+          <Link
+            href="/dashboard/integracoes"
+            className="inline-flex items-center gap-2 px-6 py-3 bg-indigo-600 text-white rounded-lg font-medium hover:bg-indigo-700 transition-colors"
+          >
+            <LinkIcon className="w-4 h-4" />
+            Ir para Integracoes
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
+  const metricCards = [
+    {
+      label: "Faturamento",
+      value: fmt.format(metrics?.faturamento ?? 0),
+      icon: DollarSign,
+      color: "bg-emerald-500",
+    },
+    {
+      label: "Pedidos",
+      value: (metrics?.pedidos ?? 0).toLocaleString("pt-BR"),
+      icon: ShoppingCart,
+      color: "bg-blue-500",
+    },
+    {
+      label: "Ticket Medio",
+      value: fmt.format(metrics?.ticket_medio ?? 0),
+      icon: Receipt,
+      color: "bg-indigo-500",
+    },
+    {
+      label: "Produtos",
+      value: (metrics?.produtos ?? 0).toLocaleString("pt-BR"),
+      icon: Package,
+      color: "bg-purple-500",
+    },
+  ];
 
   return (
     <div className="space-y-6">
       {/* Title */}
       <div>
-        <h1 className="text-2xl font-bold text-gray-900">Gestão Mercado Livre</h1>
-        <p className="text-sm text-gray-500 mt-1">Gerencie campanhas, anúncios e métricas do Mercado Livre Ads</p>
+        <h1 className="text-2xl font-bold text-gray-900">Gestao Mercado Livre</h1>
+        <p className="text-sm text-gray-500 mt-1">Gerencie sua conta e acompanhe metricas do Mercado Livre</p>
       </div>
 
-      {/* Tabs */}
-      <div className="bg-white rounded-xl shadow-sm border border-gray-200">
-        <div className="flex border-b border-gray-200">
-          {tabs.map((tab) => (
-            <button
-              key={tab}
-              onClick={() => setActiveTab(tab)}
-              className={`px-6 py-3 text-sm font-medium transition-colors border-b-2 -mb-px ${
-                activeTab === tab
-                  ? "border-primary-600 text-primary-600"
-                  : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
-              }`}
-            >
-              {tab}
-            </button>
-          ))}
-        </div>
-
-        <div className="p-6">
-          {activeTab === "Dashboard" && (
-            <div className="space-y-6">
-              {/* Metric Cards */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
-                {cards.map((card) => {
-                  const Icon = card.icon;
-                  return (
-                    <div key={card.label} className="bg-gray-50 rounded-xl border border-gray-100 p-4">
-                      <div className="flex items-center gap-3 mb-3">
-                        <div className={`${card.color} p-2 rounded-lg`}>
-                          <Icon className="h-4 w-4 text-white" />
-                        </div>
-                        <span className="text-xs text-gray-500">{card.label}</span>
-                      </div>
-                      <p className="text-lg font-bold text-gray-900">{card.value}</p>
-                      <p className={`text-xs mt-1 ${card.change.startsWith("+") ? "text-emerald-600" : "text-red-500"}`}>
-                        {card.change} vs mês anterior
-                      </p>
-                    </div>
-                  );
-                })}
+      {/* Seller Info */}
+      {seller && (
+        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+          <h3 className="text-lg font-semibold text-gray-900 mb-4">Informacoes do Vendedor</h3>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div className="flex items-center gap-3">
+              <div className="bg-indigo-100 p-3 rounded-lg">
+                <User className="h-5 w-5 text-indigo-600" />
               </div>
-
-              {/* Anúncios por Tipo */}
               <div>
-                <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
-                  <Megaphone className="h-5 w-5 text-primary-600" />
-                  Anúncios por Tipo
-                </h3>
-                <div className="space-y-4">
-                  {adTypes.map((ad) => (
-                    <div key={ad.tipo} className="bg-gray-50 rounded-lg p-4 border border-gray-100">
-                      <div className="flex items-center justify-between mb-2">
-                        <div>
-                          <p className="font-medium text-gray-900">{ad.tipo}</p>
-                          <p className="text-xs text-gray-500">{ad.quantidade} anúncios ativos</p>
-                        </div>
-                        <p className="font-semibold text-gray-900">{ad.faturamento}</p>
-                      </div>
-                      <div className="w-full bg-gray-200 rounded-full h-2.5">
-                        <div
-                          className="bg-primary-600 h-2.5 rounded-full transition-all"
-                          style={{ width: `${ad.percentual}%` }}
-                        />
-                      </div>
-                      <p className="text-xs text-gray-400 mt-1">{ad.percentual}% do faturamento total</p>
-                    </div>
-                  ))}
+                <p className="text-sm text-gray-500">Nickname</p>
+                <p className="font-semibold text-gray-900">{seller.nickname}</p>
+              </div>
+            </div>
+            <div className="flex items-center gap-3">
+              <div className="bg-amber-100 p-3 rounded-lg">
+                <Star className="h-5 w-5 text-amber-600" />
+              </div>
+              <div>
+                <p className="text-sm text-gray-500">Reputacao</p>
+                <p className="font-semibold text-gray-900">
+                  {seller.seller_reputation?.level_id?.replace(/_/g, " ") || "N/A"}
+                  {seller.seller_reputation?.power_seller_status && (
+                    <span className="ml-2 text-xs bg-yellow-100 text-yellow-800 px-2 py-0.5 rounded-full">
+                      {seller.seller_reputation.power_seller_status}
+                    </span>
+                  )}
+                </p>
+              </div>
+            </div>
+            <div className="flex items-center gap-3">
+              <div className="bg-emerald-100 p-3 rounded-lg">
+                <CalendarDays className="h-5 w-5 text-emerald-600" />
+              </div>
+              <div>
+                <p className="text-sm text-gray-500">Cadastro</p>
+                <p className="font-semibold text-gray-900">
+                  {seller.registration_date ? formatDate(seller.registration_date) : "N/A"}
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Metric Cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        {metricCards.map((card) => {
+          const Icon = card.icon;
+          return (
+            <div key={card.label} className="bg-white rounded-xl shadow-sm border border-gray-200 p-5">
+              <div className="flex items-center gap-4">
+                <div className={`${card.color} p-3 rounded-lg`}>
+                  <Icon className="h-5 w-5 text-white" />
+                </div>
+                <div>
+                  <p className="text-sm text-gray-500">{card.label}</p>
+                  <p className="text-xl font-bold text-gray-900">{card.value}</p>
                 </div>
               </div>
             </div>
-          )}
-
-          {activeTab === "Campanhas" && (
-            <div className="text-center py-12 text-gray-500">
-              <Megaphone className="h-12 w-12 mx-auto text-gray-300 mb-3" />
-              <p className="font-medium">Gerenciamento de Campanhas</p>
-              <p className="text-sm mt-1">Conecte sua conta do Mercado Livre para visualizar campanhas</p>
-            </div>
-          )}
-
-          {activeTab === "Anúncios" && (
-            <div className="text-center py-12 text-gray-500">
-              <BarChart3 className="h-12 w-12 mx-auto text-gray-300 mb-3" />
-              <p className="font-medium">Gestão de Anúncios</p>
-              <p className="text-sm mt-1">Conecte sua conta do Mercado Livre para visualizar anúncios</p>
-            </div>
-          )}
-
-          {activeTab === "Métricas" && (
-            <div className="text-center py-12 text-gray-500">
-              <TrendingUp className="h-12 w-12 mx-auto text-gray-300 mb-3" />
-              <p className="font-medium">Métricas Detalhadas</p>
-              <p className="text-sm mt-1">Conecte sua conta do Mercado Livre para visualizar métricas</p>
-            </div>
-          )}
-
-          {activeTab === "Reputação" && (
-            <div className="text-center py-12 text-gray-500">
-              <Star className="h-12 w-12 mx-auto text-gray-300 mb-3" />
-              <p className="font-medium">Reputação do Vendedor</p>
-              <p className="text-sm mt-1">Conecte sua conta do Mercado Livre para visualizar reputação</p>
-            </div>
-          )}
-        </div>
+          );
+        })}
       </div>
     </div>
   );

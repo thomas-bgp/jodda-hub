@@ -1,8 +1,38 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import { Search, MessageCircle, Bell, ChevronDown } from "lucide-react";
 
 export default function Header() {
+  const [nickname, setNickname] = useState("Usuario");
+  const [initials, setInitials] = useState("U");
+
+  useEffect(() => {
+    async function fetchSeller() {
+      try {
+        const res = await fetch("/api/mercadolivre/seller");
+        if (res.ok) {
+          const data = await res.json();
+          if (data.nickname) {
+            setNickname(data.nickname);
+            setInitials(
+              data.nickname
+                .split(" ")
+                .map((w: string) => w[0])
+                .join("")
+                .substring(0, 2)
+                .toUpperCase()
+            );
+          }
+        }
+      } catch {
+        // Not connected, keep defaults
+      }
+    }
+
+    fetchSeller();
+  }, []);
+
   return (
     <header className="sticky top-0 z-20 h-14 bg-white border-b border-gray-200 flex items-center justify-between px-6 shadow-sm">
       {/* Search */}
@@ -40,11 +70,11 @@ export default function Header() {
         {/* User */}
         <button className="flex items-center gap-2 hover:bg-gray-50 rounded-lg px-2 py-1.5 transition-colors">
           <div className="h-8 w-8 rounded-full bg-primary-600 flex items-center justify-center text-white text-sm font-semibold">
-            UT
+            {initials}
           </div>
           <div className="hidden md:block text-left">
-            <p className="text-sm font-medium text-gray-700">Usuário Teste</p>
-            <p className="text-xs text-gray-400">Admin</p>
+            <p className="text-sm font-medium text-gray-700">{nickname}</p>
+            <p className="text-xs text-gray-400">Vendedor</p>
           </div>
           <ChevronDown className="h-4 w-4 text-gray-400 hidden md:block" />
         </button>

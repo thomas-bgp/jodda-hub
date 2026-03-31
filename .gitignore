@@ -2,5 +2,5 @@ node_modules
 .next
 .env
 screenshots
-src/data/ml-token.json
+data/ml-token.json
 node_modules

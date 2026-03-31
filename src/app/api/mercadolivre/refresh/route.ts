@@ -2,6 +2,8 @@ import { NextResponse } from "next/server";
 import { readFile, writeFile } from "fs/promises";
 import path from "path";
 
+export const dynamic = "force-dynamic";
+
 export async function POST() {
   const appId = process.env.ML_APP_ID;
   const appSecret = process.env.ML_APP_SECRET;
@@ -13,7 +15,7 @@ export async function POST() {
     );
   }
 
-  const tokenPath = path.join(process.cwd(), "src", "data", "ml-token.json");
+  const tokenPath = path.join(process.cwd(), "data", "ml-token.json");
 
   let currentToken;
   try {

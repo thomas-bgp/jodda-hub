@@ -53,10 +53,6 @@ const bottomItems: MenuItem[] = [
   { label: "FAQ", icon: HelpCircle, href: "/dashboard/faq" },
 ];
 
-const recentOrders = [
-  { id: "#4832", customer: "Maria Silva", amount: "R$ 189,90", time: "há 5 min" },
-  { id: "#4831", customer: "João Santos", amount: "R$ 324,50", time: "há 12 min" },
-];
 
 export default function Sidebar() {
   const [collapsed, setCollapsed] = useState(false);
@@ -139,32 +135,6 @@ export default function Sidebar() {
         </div>
       </nav>
 
-      {/* Recent Orders */}
-      {!collapsed && (
-        <div className="px-4 pb-4">
-          <div className="bg-white/10 rounded-lg p-3">
-            <p className="text-xs font-semibold text-indigo-200 uppercase tracking-wider mb-2">
-              Vendas Recentes
-            </p>
-            <div className="space-y-2">
-              {recentOrders.map((order) => (
-                <div
-                  key={order.id}
-                  className="flex items-center justify-between text-xs"
-                >
-                  <div>
-                    <p className="text-white font-medium">
-                      {order.id} - {order.customer}
-                    </p>
-                    <p className="text-indigo-300">{order.time}</p>
-                  </div>
-                  <span className="text-emerald-300 font-semibold">{order.amount}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      )}
     </aside>
   );
 }

@@ -75,8 +75,8 @@ export async function GET(request: NextRequest) {
       updated_at: new Date().toISOString(),
     };
 
-    // Store token in file
-    const dataDir = path.join(process.cwd(), "src", "data");
+    // Store token in file (persistent volume at /app/data)
+    const dataDir = path.join(process.cwd(), "data");
     await mkdir(dataDir, { recursive: true });
 
     const tokenPath = path.join(dataDir, "ml-token.json");
