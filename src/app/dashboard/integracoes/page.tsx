@@ -170,7 +170,7 @@ function IntegracoesContent() {
             {erpCards.map((erp) => (
               <div
                 key={erp.name}
-                className={`bg-white rounded-xl border-l-4 ${erp.color} shadow-sm hover:shadow-md transition-all duration-200 p-5`}
+                className={`bg-white rounded-xl border-l-4 ${erp.color} shadow-sm opacity-75 p-5`}
               >
                 <div className="flex items-center gap-3 mb-4">
                   <div
@@ -182,16 +182,10 @@ function IntegracoesContent() {
                   </div>
                   <div>
                     <h3 className="font-semibold text-gray-900">{erp.name}</h3>
-                    <div className="flex items-center gap-1.5 mt-0.5">
-                      <XCircle className="w-3.5 h-3.5 text-gray-400" />
-                      <span className="text-xs text-gray-500">
-                        Não configurado
-                      </span>
-                    </div>
                   </div>
                 </div>
-                <button className="w-full py-2 px-4 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium rounded-lg transition-colors duration-150">
-                  Nova Integração
+                <button className="w-full py-2 px-4 bg-gray-100 text-gray-400 text-sm font-medium rounded-lg cursor-not-allowed">
+                  Em breve
                 </button>
               </div>
             ))}
@@ -388,7 +382,7 @@ function IntegracoesContent() {
             {marketplaceCards.map((mp) => (
               <div
                 key={mp.name}
-                className={`bg-white rounded-xl border-l-4 ${mp.color} shadow-sm hover:shadow-md transition-all duration-200 p-5`}
+                className={`bg-white rounded-xl border-l-4 ${mp.color} shadow-sm opacity-75 p-5`}
               >
                 <div className="flex items-center gap-3 mb-4">
                   <div
@@ -400,24 +394,11 @@ function IntegracoesContent() {
                   </div>
                   <div>
                     <h3 className="font-semibold text-gray-900">{mp.name}</h3>
-                    <div className="flex items-center gap-1.5 mt-0.5">
-                      <XCircle className="w-3.5 h-3.5 text-gray-400" />
-                      <span className="text-xs text-gray-500">
-                        Não configurado
-                      </span>
-                    </div>
                   </div>
                 </div>
-                {mp.name === "Shopee" ? (
-                  <button className="w-full py-2 px-4 bg-orange-500 hover:bg-orange-600 text-white text-sm font-medium rounded-lg transition-colors duration-150 flex items-center justify-center gap-2">
-                    <ExternalLink className="w-4 h-4" />
-                    Nova Integração Shopee
-                  </button>
-                ) : (
-                  <button className="w-full py-2 px-4 bg-gray-100 text-gray-400 text-sm font-medium rounded-lg cursor-not-allowed">
-                    Em breve
-                  </button>
-                )}
+                <button className="w-full py-2 px-4 bg-gray-100 text-gray-400 text-sm font-medium rounded-lg cursor-not-allowed">
+                  Em breve
+                </button>
               </div>
             ))}
           </div>
