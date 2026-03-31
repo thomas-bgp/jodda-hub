@@ -1,0 +1,5 @@
+node_modules
+.next
+.env
+screenshots
+src/data/ml-token.json
