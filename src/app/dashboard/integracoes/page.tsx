@@ -336,7 +336,7 @@ function IntegracoesContent() {
                                   Nome da Loja
                                 </p>
                                 <p className="text-sm font-medium text-gray-900">
-                                  Jodda Store Oficial
+                                  Minha Loja Oficial
                                 </p>
                               </div>
                             </div>

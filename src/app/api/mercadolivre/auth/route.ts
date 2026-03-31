@@ -4,7 +4,7 @@ export async function GET() {
   const appId = process.env.ML_APP_ID;
   const redirectUri =
     process.env.ML_REDIRECT_URI ||
-    "https://appjodda.com/api/mercadolivre/callback";
+    "https://ecomerce.bertuzzipatrimonial.com.br/api/mercadolivre/callback";
 
   if (!appId) {
     return NextResponse.json(

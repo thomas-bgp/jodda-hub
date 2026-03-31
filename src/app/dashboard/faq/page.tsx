@@ -22,7 +22,7 @@ const faqs = [
   {
     question: "Posso gerenciar múltiplos marketplaces ao mesmo tempo?",
     answer:
-      "Sim, o Jodda Hub permite gerenciar Mercado Livre, Shopee, Amazon, Magalu e Via/Tiny ERP em uma única plataforma. Todos os pedidos, produtos e métricas são centralizados no dashboard principal para facilitar a gestão do seu e-commerce.",
+      "Sim, o Hub E-commerce permite gerenciar Mercado Livre, Shopee, Amazon, Magalu e Via/Tiny ERP em uma única plataforma. Todos os pedidos, produtos e métricas são centralizados no dashboard principal para facilitar a gestão do seu e-commerce.",
   },
   {
     question: "Como exportar relatórios de vendas?",
@@ -42,7 +42,7 @@ export default function FAQPage() {
           <HelpCircle className="h-7 w-7 text-primary-600" />
           Perguntas Frequentes
         </h1>
-        <p className="text-sm text-gray-500 mt-1">Tire suas dúvidas sobre a plataforma Jodda Hub</p>
+        <p className="text-sm text-gray-500 mt-1">Tire suas dúvidas sobre a plataforma Hub E-commerce</p>
       </div>
 
       {/* Accordion */}

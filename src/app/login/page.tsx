@@ -57,7 +57,7 @@ export default function LoginPage() {
           {/* Logo */}
           <div className="text-center mb-8">
             <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-400 to-indigo-400 bg-clip-text text-transparent">
-              Jodda
+              Hub E-commerce
             </h1>
             <p className="text-sm text-gray-400 mt-2">
               Acesse sua conta para continuar
@@ -162,7 +162,7 @@ export default function LoginPage() {
           </form>
 
           <p className="text-center text-xs text-gray-500 mt-6">
-            Jodda Hub &copy; 2025. Todos os direitos reservados.
+            Hub E-commerce Hub &copy; 2025. Todos os direitos reservados.
           </p>
         </div>
       </div>

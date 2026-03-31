@@ -5,7 +5,7 @@ import "./globals.css";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "Jodda - Hub E-commerce",
+  title: "Hub E-commerce - Gestão de Marketplaces",
   description: "Plataforma de gestão integrada para e-commerce",
 };
 

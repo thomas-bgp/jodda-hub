@@ -106,7 +106,7 @@ export default function Sidebar() {
             <div className="h-8 w-8 rounded-lg bg-white/20 flex items-center justify-center">
               <ShoppingBag className="h-5 w-5 text-white" />
             </div>
-            <span className="text-lg font-bold text-white tracking-tight">Jodda</span>
+            <span className="text-lg font-bold text-white tracking-tight">Hub E-commerce</span>
           </div>
         )}
         <button
