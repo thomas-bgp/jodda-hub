@@ -1,8 +1,8 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { randomBytes, createHash } from "crypto";
 import { cookies } from "next/headers";
 
-export async function GET() {
+export async function GET(request: NextRequest) {
   const appId = process.env.ML_APP_ID;
   const redirectUri =
     process.env.ML_REDIRECT_URI ||
@@ -15,7 +15,6 @@ export async function GET() {
     );
   }
 
-  // Generate PKCE code_verifier and code_challenge
   const codeVerifier = randomBytes(32)
     .toString("base64url")
     .replace(/[^a-zA-Z0-9]/g, "")
@@ -25,7 +24,9 @@ export async function GET() {
     .update(codeVerifier)
     .digest("base64url");
 
-  // Store code_verifier in cookie for callback
+  // Allow flow to specify post-auth landing page (e.g. public /conectado)
+  const returnTo = request.nextUrl.searchParams.get("return") || "";
+
   const cookieStore = await cookies();
   cookieStore.set("ml_code_verifier", codeVerifier, {
     httpOnly: true,
@@ -33,6 +34,15 @@ export async function GET() {
     maxAge: 600,
     sameSite: "lax",
   });
+
+  if (returnTo.startsWith("/")) {
+    cookieStore.set("ml_return_to", returnTo, {
+      httpOnly: true,
+      path: "/",
+      maxAge: 600,
+      sameSite: "lax",
+    });
+  }
 
   const authUrl =
     `https://auth.mercadolivre.com.br/authorization` +

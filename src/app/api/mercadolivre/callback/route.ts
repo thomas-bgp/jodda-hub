@@ -87,9 +87,17 @@ export async function GET(request: NextRequest) {
     const baseUrl = process.env.ML_REDIRECT_URI
       ? new URL(process.env.ML_REDIRECT_URI).origin
       : "https://ecomerce.bertuzzipatrimonial.com.br";
-    return NextResponse.redirect(
-      `${baseUrl}/dashboard/integracoes?ml=connected`
-    );
+
+    const returnTo = cookieStore.get("ml_return_to")?.value;
+    cookieStore.delete("ml_return_to");
+    cookieStore.delete("ml_code_verifier");
+
+    const target =
+      returnTo && returnTo.startsWith("/")
+        ? `${baseUrl}${returnTo}`
+        : `${baseUrl}/dashboard/integracoes?ml=connected`;
+
+    return NextResponse.redirect(target);
   } catch (error) {
     console.error("ML callback error:", error);
     return NextResponse.json(
