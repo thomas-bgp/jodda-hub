@@ -27,6 +27,13 @@ export async function GET(request: NextRequest) {
   // Allow flow to specify post-auth landing page (e.g. public /conectado)
   const returnTo = request.nextUrl.searchParams.get("return") || "";
 
+  // Multi-tenant: identifica qual cliente está autorizando. Vai no `state`
+  // (round-trip garantido pelo OAuth) e também num cookie de fallback.
+  const client = (request.nextUrl.searchParams.get("client") || "")
+    .toLowerCase()
+    .replace(/[^a-z0-9_-]/g, "")
+    .slice(0, 40);
+
   const cookieStore = await cookies();
   cookieStore.set("ml_code_verifier", codeVerifier, {
     httpOnly: true,
@@ -34,6 +41,15 @@ export async function GET(request: NextRequest) {
     maxAge: 600,
     sameSite: "lax",
   });
+
+  if (client) {
+    cookieStore.set("ml_client", client, {
+      httpOnly: true,
+      path: "/",
+      maxAge: 600,
+      sameSite: "lax",
+    });
+  }
 
   if (returnTo.startsWith("/")) {
     cookieStore.set("ml_return_to", returnTo, {
@@ -50,7 +66,8 @@ export async function GET(request: NextRequest) {
     `&client_id=${appId}` +
     `&redirect_uri=${encodeURIComponent(redirectUri)}` +
     `&code_challenge=${codeChallenge}` +
-    `&code_challenge_method=S256`;
+    `&code_challenge_method=S256` +
+    (client ? `&state=${encodeURIComponent(client)}` : "");
 
   return NextResponse.redirect(authUrl);
 }

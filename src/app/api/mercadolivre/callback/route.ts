@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { writeFile, mkdir } from "fs/promises";
 import { cookies } from "next/headers";
 import path from "path";
+import { tokenFilePath, clientSlug } from "@/lib/ml-token";
 
 export async function GET(request: NextRequest) {
   const code = request.nextUrl.searchParams.get("code");
@@ -26,8 +27,14 @@ export async function GET(request: NextRequest) {
     );
   }
 
-  // Get PKCE code_verifier from cookie
+  // Multi-tenant: descobre qual cliente está autorizando, via state (OAuth) ou cookie.
+  // Sem cliente => arquivo legado ml-token.json (Renalbor), comportamento inalterado.
   const cookieStore = await cookies();
+  const stateClient = request.nextUrl.searchParams.get("state") || "";
+  const cookieClient = cookieStore.get("ml_client")?.value || "";
+  const client = clientSlug(stateClient || cookieClient);
+
+  // Get PKCE code_verifier from cookie
   const codeVerifier = cookieStore.get("ml_code_verifier")?.value;
 
   if (!codeVerifier) {
@@ -75,14 +82,19 @@ export async function GET(request: NextRequest) {
       updated_at: new Date().toISOString(),
     };
 
-    // Store token in file (persistent volume at /app/data)
+    // Store token in file (persistent volume at /app/data), por cliente.
     const dataDir = path.join(process.cwd(), "data");
     await mkdir(dataDir, { recursive: true });
 
-    const tokenPath = path.join(dataDir, "ml-token.json");
+    const tokenPath = tokenFilePath(client);
     await writeFile(tokenPath, JSON.stringify(tokenInfo, null, 2), "utf-8");
 
-    console.log("ML token saved for user_id:", tokenInfo.user_id);
+    console.log(
+      "ML token saved for client:",
+      client || "(legacy)",
+      "user_id:",
+      tokenInfo.user_id
+    );
 
     const baseUrl = process.env.ML_REDIRECT_URI
       ? new URL(process.env.ML_REDIRECT_URI).origin
@@ -91,6 +103,7 @@ export async function GET(request: NextRequest) {
     const returnTo = cookieStore.get("ml_return_to")?.value;
     cookieStore.delete("ml_return_to");
     cookieStore.delete("ml_code_verifier");
+    cookieStore.delete("ml_client");
 
     const target =
       returnTo && returnTo.startsWith("/")

@@ -1,10 +1,10 @@
-import { NextResponse } from "next/server";
-import { readFile, writeFile } from "fs/promises";
-import path from "path";
+import { NextRequest, NextResponse } from "next/server";
+import { readFile } from "fs/promises";
+import { tokenFilePath, refreshAndStore } from "@/lib/ml-token";
 
 export const dynamic = "force-dynamic";
 
-export async function POST() {
+export async function POST(request: NextRequest) {
   const appId = process.env.ML_APP_ID;
   const appSecret = process.env.ML_APP_SECRET;
 
@@ -15,11 +15,12 @@ export async function POST() {
     );
   }
 
-  const tokenPath = path.join(process.cwd(), "data", "ml-token.json");
+  // Multi-tenant: ?client=<slug>. Sem o parâmetro = token legado (Renalbor).
+  const client = request.nextUrl.searchParams.get("client");
 
   let currentToken;
   try {
-    const raw = await readFile(tokenPath, "utf-8");
+    const raw = await readFile(tokenFilePath(client), "utf-8");
     currentToken = JSON.parse(raw);
   } catch {
     return NextResponse.json(
@@ -29,60 +30,17 @@ export async function POST() {
   }
 
   if (!currentToken.refresh_token) {
-    return NextResponse.json(
-      { error: "Refresh token ausente." },
-      { status: 400 }
-    );
+    return NextResponse.json({ error: "Refresh token ausente." }, { status: 400 });
   }
 
-  try {
-    const tokenResponse = await fetch(
-      "https://api.mercadolibre.com/oauth/token",
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          grant_type: "refresh_token",
-          client_id: appId,
-          client_secret: appSecret,
-          refresh_token: currentToken.refresh_token,
-        }),
-      }
-    );
-
-    if (!tokenResponse.ok) {
-      const errorBody = await tokenResponse.text();
-      console.error("ML token refresh failed:", tokenResponse.status, errorBody);
-      return NextResponse.json(
-        { error: "Falha ao renovar token.", details: errorBody },
-        { status: 502 }
-      );
-    }
-
-    const tokenData = await tokenResponse.json();
-
-    const updatedToken = {
-      access_token: tokenData.access_token,
-      refresh_token: tokenData.refresh_token,
-      user_id: tokenData.user_id,
-      expires_at: new Date(
-        Date.now() + tokenData.expires_in * 1000
-      ).toISOString(),
-      updated_at: new Date().toISOString(),
-    };
-
-    await writeFile(tokenPath, JSON.stringify(updatedToken, null, 2), "utf-8");
-
-    return NextResponse.json({
-      success: true,
-      user_id: updatedToken.user_id,
-      expires_at: updatedToken.expires_at,
-    });
-  } catch (error) {
-    console.error("ML refresh error:", error);
-    return NextResponse.json(
-      { error: "Erro interno ao renovar token." },
-      { status: 500 }
-    );
+  const updated = await refreshAndStore(currentToken, client);
+  if (!updated) {
+    return NextResponse.json({ error: "Falha ao renovar token." }, { status: 502 });
   }
+
+  return NextResponse.json({
+    success: true,
+    user_id: updated.user_id,
+    expires_at: updated.expires_at,
+  });
 }

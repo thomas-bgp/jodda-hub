@@ -20,7 +20,11 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: "unauthorized" }, { status: 401 });
   }
 
-  const token = await getValidToken();
+  // Multi-tenant: ?client=<slug> lê o token daquele cliente.
+  // Sem o parâmetro = token legado (Renalbor), mantendo compat com consumidores antigos.
+  const client = request.nextUrl.searchParams.get("client");
+
+  const token = await getValidToken(client);
   if (!token) {
     return NextResponse.json(
       { error: "Nenhum token salvo. Cliente ainda não autorizou." },

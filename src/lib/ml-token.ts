@@ -9,9 +9,25 @@ interface MlToken {
   updated_at: string;
 }
 
-const TOKEN_PATH = path.join(process.cwd(), "data", "ml-token.json");
+const DATA_DIR = path.join(process.cwd(), "data");
 
-export async function getValidToken(): Promise<MlToken | null> {
+// Sanitiza o slug do cliente. Vazio/undefined => arquivo legado single-tenant
+// (ml-token.json), que é o token da Renalbor já existente. NÃO mexer nesse
+// comportamento para não quebrar o auto-refresh dela.
+export function clientSlug(client?: string | null): string {
+  return (client || "").toLowerCase().replace(/[^a-z0-9_-]/g, "").slice(0, 40);
+}
+
+export function tokenFilePath(client?: string | null): string {
+  const slug = clientSlug(client);
+  return path.join(DATA_DIR, slug ? `ml-token-${slug}.json` : "ml-token.json");
+}
+
+export async function getValidToken(
+  client?: string | null
+): Promise<MlToken | null> {
+  const TOKEN_PATH = tokenFilePath(client);
+
   let token: MlToken;
   try {
     const raw = await readFile(TOKEN_PATH, "utf-8");
@@ -22,16 +38,15 @@ export async function getValidToken(): Promise<MlToken | null> {
 
   if (!token.access_token || !token.refresh_token) return null;
 
-  // Check if token expires in less than 30 minutes
+  // Renova se faltar menos de 30 minutos para expirar
   const expiresAt = new Date(token.expires_at).getTime();
   const now = Date.now();
   const thirtyMinutes = 30 * 60 * 1000;
 
   if (expiresAt - now < thirtyMinutes) {
-    // Token expired or about to expire — refresh it
-    const refreshed = await refreshToken(token);
+    const refreshed = await refreshAndStore(token, client);
     if (refreshed) return refreshed;
-    // If refresh fails but token hasn't fully expired, try using it anyway
+    // Se o refresh falhou mas o token ainda não expirou de fato, usa mesmo assim
     if (expiresAt > now) return token;
     return null;
   }
@@ -39,7 +54,12 @@ export async function getValidToken(): Promise<MlToken | null> {
   return token;
 }
 
-async function refreshToken(token: MlToken): Promise<MlToken | null> {
+// Renova via refresh_token e persiste o NOVO token (incl. refresh_token rotativo
+// — uso único no ML) no arquivo do mesmo cliente.
+export async function refreshAndStore(
+  token: MlToken,
+  client?: string | null
+): Promise<MlToken | null> {
   const appId = process.env.ML_APP_ID;
   const appSecret = process.env.ML_APP_SECRET;
 
@@ -72,10 +92,18 @@ async function refreshToken(token: MlToken): Promise<MlToken | null> {
       updated_at: new Date().toISOString(),
     };
 
-    const dataDir = path.join(process.cwd(), "data");
-    await mkdir(dataDir, { recursive: true });
-    await writeFile(TOKEN_PATH, JSON.stringify(updated, null, 2), "utf-8");
-    console.log("ML token auto-refreshed for user_id:", updated.user_id);
+    await mkdir(DATA_DIR, { recursive: true });
+    await writeFile(
+      tokenFilePath(client),
+      JSON.stringify(updated, null, 2),
+      "utf-8"
+    );
+    console.log(
+      "ML token auto-refreshed for client:",
+      clientSlug(client) || "(legacy)",
+      "user_id:",
+      updated.user_id
+    );
 
     return updated;
   } catch (err) {

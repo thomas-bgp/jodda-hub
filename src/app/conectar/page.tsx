@@ -1,6 +1,19 @@
-export const dynamic = "force-static";
+export const dynamic = "force-dynamic";
 
-export default function ConectarPage() {
+export default function ConectarPage({
+  searchParams,
+}: {
+  searchParams?: { client?: string };
+}) {
+  // Multi-tenant: /conectar?client=<slug> amarra a autorização a um cliente.
+  const client = (searchParams?.client || "")
+    .toLowerCase()
+    .replace(/[^a-z0-9_-]/g, "")
+    .slice(0, 40);
+  const authHref = `/api/mercadolivre/auth?return=/conectado${
+    client ? `&client=${encodeURIComponent(client)}` : ""
+  }`;
+
   return (
     <div className="min-h-screen flex items-center justify-center relative overflow-hidden bg-gradient-to-br from-slate-900 via-indigo-950 to-purple-950">
       <div
@@ -23,7 +36,7 @@ export default function ConectarPage() {
           </div>
 
           <a
-            href="/api/mercadolivre/auth?return=/conectado"
+            href={authHref}
             className="block w-full py-3 px-4 rounded-xl font-semibold text-center text-white bg-yellow-500 hover:bg-yellow-600 transition-colors shadow-lg"
           >
             Conectar Mercado Livre
