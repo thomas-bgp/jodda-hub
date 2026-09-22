@@ -10,6 +10,12 @@ export default function Header() {
   useEffect(() => {
     async function fetchSeller() {
       try {
+        const me = await fetch("/api/auth/me");
+        if (me.ok) {
+          const { name } = await me.json();
+          setNickname(name);
+          setInitials(name.slice(0, 2).toUpperCase());
+        }
         const res = await fetch("/api/mercadolivre/seller");
         if (res.ok) {
           const data = await res.json();
@@ -49,7 +55,7 @@ export default function Header() {
       <div className="flex items-center gap-4 ml-4">
         {/* Support - WhatsApp */}
         <a
-          href="https://wa.me/5511999999999"
+          href="https://bertuzzipatrimonial.com.br"
           target="_blank"
           rel="noopener noreferrer"
           className="flex items-center gap-2 px-3 py-1.5 text-sm font-medium text-emerald-700 bg-emerald-50 hover:bg-emerald-100 rounded-lg transition-colors"

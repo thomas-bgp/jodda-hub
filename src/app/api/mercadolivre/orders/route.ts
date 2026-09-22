@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { getValidToken } from "@/lib/ml-token";
+import { getSession } from "@/lib/session";
 
 export const dynamic = "force-dynamic";
 
@@ -13,7 +14,7 @@ async function mlFetch(url: string, accessToken: string) {
 
 export async function GET() {
   try {
-    const token = await getValidToken();
+    const token = await getValidToken(getSession()?.tenant);
     if (!token) {
       return NextResponse.json(
         { error: "Não conectado ao Mercado Livre", connected: false },

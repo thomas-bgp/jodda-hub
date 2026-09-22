@@ -15,7 +15,6 @@ import {
   HelpCircle,
   ChevronLeft,
   ChevronRight,
-  ShoppingBag,
 } from "lucide-react";
 
 interface MenuItem {
@@ -91,18 +90,16 @@ export default function Sidebar() {
     <aside
       className={`
         sidebar fixed top-0 left-0 h-screen z-30 flex flex-col
-        bg-gradient-to-b from-indigo-700 via-indigo-600 to-indigo-800
+        bg-gradient-to-b from-indigo-800 via-indigo-700 to-indigo-900
         ${collapsed ? "sidebar-collapsed" : "sidebar-expanded"}
       `}
     >
       {/* Logo */}
       <div className="flex items-center justify-between px-4 h-16 border-b border-white/10">
         {!collapsed && (
-          <div className="flex items-center gap-2">
-            <div className="h-8 w-8 rounded-lg bg-white/20 flex items-center justify-center">
-              <ShoppingBag className="h-5 w-5 text-white" />
-            </div>
-            <span className="text-lg font-bold text-white tracking-tight">Hub E-commerce</span>
+          <div className="flex flex-col gap-1">
+            <img src="/bgp-logo-white.png" alt="BGP" className="h-5 w-auto self-start" />
+            <span className="text-xs font-medium text-indigo-200 tracking-wide">Hub E-commerce</span>
           </div>
         )}
         <button

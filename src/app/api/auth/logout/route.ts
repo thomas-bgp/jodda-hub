@@ -1,21 +1,12 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
+import { SESSION_COOKIE } from "@/lib/session";
+import { BASE_URL } from "@/lib/shopee";
 
-export async function POST() {
-  const response = NextResponse.redirect(new URL("/login", process.env.NEXTAUTH_URL || "http://localhost:3000"));
-  response.cookies.set("auth-token", "", {
-    httpOnly: true,
-    path: "/",
-    maxAge: 0,
-  });
+function logout(_request: NextRequest) {
+  const response = NextResponse.redirect(new URL("/login", BASE_URL));
+  response.cookies.set(SESSION_COOKIE, "", { httpOnly: true, path: "/", maxAge: 0 });
   return response;
 }
 
-export async function GET() {
-  const response = NextResponse.redirect(new URL("/login", process.env.NEXTAUTH_URL || "http://localhost:3000"));
-  response.cookies.set("auth-token", "", {
-    httpOnly: true,
-    path: "/",
-    maxAge: 0,
-  });
-  return response;
-}
+export const GET = logout;
+export const POST = logout;

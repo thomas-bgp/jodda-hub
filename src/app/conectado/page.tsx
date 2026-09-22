@@ -2,7 +2,7 @@ export const dynamic = "force-static";
 
 export default function ConectadoPage() {
   return (
-    <div className="min-h-screen flex items-center justify-center relative overflow-hidden bg-gradient-to-br from-slate-900 via-emerald-950 to-indigo-950">
+    <div className="min-h-screen flex items-center justify-center relative overflow-hidden bg-gradient-to-br from-slate-900 via-indigo-950 to-indigo-900">
       <div
         className="absolute inset-0 opacity-10"
         style={{
@@ -32,7 +32,7 @@ export default function ConectadoPage() {
             Conexão concluída
           </h1>
           <p className="text-sm text-gray-300">
-            Sua conta Mercado Livre foi autorizada com sucesso.
+            Sua conta foi autorizada com sucesso na BGP.
           </p>
           <p className="text-xs text-gray-500 mt-6">
             Você já pode fechar esta janela.

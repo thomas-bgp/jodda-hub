@@ -24,7 +24,7 @@ export default function LoginPage() {
       });
 
       if (res.ok) {
-        router.push("/dashboard");
+        router.push(new URLSearchParams(window.location.search).get("callbackUrl") || "/dashboard");
       } else {
         const data = await res.json();
         setError(data.error || "Erro ao fazer login");
@@ -56,9 +56,8 @@ export default function LoginPage() {
         <div className="backdrop-blur-xl bg-white/10 border border-white/20 rounded-2xl shadow-2xl p-8">
           {/* Logo */}
           <div className="text-center mb-8">
-            <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-400 to-indigo-400 bg-clip-text text-transparent">
-              Hub E-commerce
-            </h1>
+            <img src="/bgp-logo-white.png" alt="BGP" className="h-10 w-auto mx-auto mb-3" />
+            <h1 className="text-xl font-semibold text-indigo-100">Hub E-commerce</h1>
             <p className="text-sm text-gray-400 mt-2">
               Acesse sua conta para continuar
             </p>
@@ -130,7 +129,7 @@ export default function LoginPage() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full py-3 px-4 rounded-xl font-semibold text-white bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 shadow-lg shadow-indigo-500/25 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full py-3 px-4 rounded-xl font-semibold text-white bg-gradient-to-r from-indigo-600 to-indigo-500 hover:from-indigo-500 hover:to-indigo-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 shadow-lg shadow-indigo-500/25 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {loading ? (
                 <span className="flex items-center justify-center gap-2">
@@ -162,7 +161,7 @@ export default function LoginPage() {
           </form>
 
           <p className="text-center text-xs text-gray-500 mt-6">
-            Hub E-commerce Hub &copy; 2025. Todos os direitos reservados.
+            BGP · Bertuzzi Gestão Patrimonial &copy; 2026
           </p>
         </div>
       </div>

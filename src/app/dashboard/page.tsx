@@ -95,7 +95,7 @@ export default function DashboardPage() {
   if (!connected) {
     return (
       <div className="space-y-8">
-        <div className="bg-gradient-to-r from-blue-600 to-indigo-600 rounded-2xl p-6 sm:p-8 text-white shadow-lg shadow-indigo-500/20">
+        <div className="bg-gradient-to-r from-indigo-700 to-indigo-900 rounded-2xl p-6 sm:p-8 text-white shadow-lg shadow-indigo-500/20">
           <h2 className="text-2xl sm:text-3xl font-bold">
             Ola, {sellerName}
           </h2>
@@ -154,7 +154,7 @@ export default function DashboardPage() {
   return (
     <div className="space-y-8">
       {/* Welcome Banner */}
-      <div className="bg-gradient-to-r from-blue-600 to-indigo-600 rounded-2xl p-6 sm:p-8 text-white shadow-lg shadow-indigo-500/20">
+      <div className="bg-gradient-to-r from-indigo-700 to-indigo-900 rounded-2xl p-6 sm:p-8 text-white shadow-lg shadow-indigo-500/20">
         <h2 className="text-2xl sm:text-3xl font-bold">
           Ola, {sellerName}
         </h2>

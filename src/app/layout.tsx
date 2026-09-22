@@ -5,8 +5,8 @@ import "./globals.css";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "Hub E-commerce - Gestão de Marketplaces",
-  description: "Plataforma de gestão integrada para e-commerce",
+  title: "BGP Hub E-commerce - Gestão de Marketplaces",
+  description: "Plataforma da BGP (Bertuzzi Gestão Patrimonial) para gestão e BI de marketplaces",
 };
 
 export default function RootLayout({
