@@ -4,7 +4,8 @@ import path from "path";
 
 // Shopee Open Platform v2. Assinatura = HMAC-SHA256(partner_key,
 // partner_id + path + timestamp [+ access_token + shop_id]) em hex.
-// SHOPEE_HOST: sandbox = https://partner.test-stable.shopeemobile.com,
+// SHOPEE_HOST: sandbox v2 = https://openplatform.sandbox.test-stable.shopee.sg
+//              (o antigo partner.test-stable.shopeemobile.com responde "Wrong sign" p/ chaves novas),
 //              live    = https://partner.shopeemobile.com
 
 export const BASE_URL =
@@ -23,7 +24,7 @@ const DATA_DIR = path.join(process.cwd(), "data");
 function config() {
   const partnerId = Number(process.env.SHOPEE_PARTNER_ID);
   const partnerKey = process.env.SHOPEE_PARTNER_KEY || "";
-  const host = process.env.SHOPEE_HOST || "https://partner.test-stable.shopeemobile.com";
+  const host = process.env.SHOPEE_HOST || "https://openplatform.sandbox.test-stable.shopee.sg";
   if (!partnerId || !partnerKey) {
     throw new Error("SHOPEE_PARTNER_ID/SHOPEE_PARTNER_KEY não configurados");
   }
