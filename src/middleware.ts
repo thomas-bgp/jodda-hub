@@ -7,6 +7,7 @@ import type { NextRequest } from "next/server";
 const PROTECTED_API = [
   /^\/api\/mercadolivre\/(seller|items|orders|metrics|status)/,
   /^\/api\/shopee\/(status|shop|orders|disconnect)/,
+  /^\/api\/magalu\/(status|orders|disconnect)/,
 ];
 
 async function isValidSession(value?: string): Promise<boolean> {
@@ -55,5 +56,6 @@ export const config = {
     "/dashboard/:path*",
     "/api/mercadolivre/:route(seller|items|orders|metrics|status)",
     "/api/shopee/:route(status|shop|orders|disconnect)",
+    "/api/magalu/:route(status|orders|disconnect)",
   ],
 };

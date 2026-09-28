@@ -17,6 +17,7 @@ import {
   Store,
 } from "lucide-react";
 import ShopeeCard from "@/components/ShopeeCard";
+import MagaluCard from "@/components/MagaluCard";
 
 interface MlStatus {
   connected: boolean;
@@ -117,13 +118,6 @@ function IntegracoesContent() {
   ];
 
   const marketplaceCards = [
-    {
-      name: "Magalu",
-      color: "border-blue-400",
-      iconBg: "bg-blue-50",
-      iconColor: "text-blue-600",
-      letter: "M",
-    },
     {
       name: "Amazon",
       color: "border-orange-400",
@@ -376,6 +370,7 @@ function IntegracoesContent() {
             </div>
 
             <ShopeeCard />
+            <MagaluCard />
 
             {/* Other Marketplace Cards */}
             {marketplaceCards.map((mp) => (

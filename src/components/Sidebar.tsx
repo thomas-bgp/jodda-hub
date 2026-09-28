@@ -41,6 +41,7 @@ const sections: MenuSection[] = [
     items: [
       { label: "Gestão Mercado Livre", icon: Store, href: "/dashboard/mercado-livre" },
       { label: "Gestão Shopee", icon: Store, href: "/dashboard/shopee" },
+      { label: "Gestão Magalu", icon: Store, href: "/dashboard/magalu" },
     ],
   },
 ];
